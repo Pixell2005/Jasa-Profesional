@@ -24,9 +24,42 @@ export default function Navbar() {
         {isLoggedIn ? (
           <>
             <span style={styles.greeting}>Halo, {user?.name}</span>
-            <button style={styles.btn} onClick={() => navigate('/bookings')}>
-              Booking Saya
-            </button>
+            
+            {user?.role === 'customer' && (
+              <button style={styles.btn} onClick={() => navigate('/bookings')}>
+                Booking Saya
+              </button>
+            )}
+            
+            {user?.role === 'vendor' && (
+              <>
+                <button style={styles.btn} onClick={() => navigate('/vendor/dashboard')}>
+                  Dashboard Vendor
+                </button>
+                <button style={styles.btn} onClick={() => navigate('/bookings')}>
+                  Booking Sebagai Customer
+                </button>
+              </>
+            )}
+            
+            {user?.role === 'admin' && (
+              <>
+                <button style={styles.btn} onClick={() => navigate('/admin')}>
+                  Admin Panel
+                </button>
+                <button style={styles.btn} onClick={() => navigate('/bookings')}>
+                  Dashboard
+                </button>
+              </>
+            )}
+
+            {/* Option to register as vendor for customers */}
+            {user?.role === 'customer' && (
+              <button style={{...styles.btn, ...styles.btnVendor}} onClick={() => navigate('/vendor/register')}>
+                Daftar Vendor
+              </button>
+            )}
+
             <button style={{ ...styles.btn, ...styles.btnDanger }} onClick={handleLogout}>
               Keluar
             </button>
@@ -67,6 +100,7 @@ const styles = {
     display: 'flex',
     gap: '8px',
     alignItems: 'center',
+    flexWrap: 'wrap',
   },
   greeting: {
     fontSize: '13px',
@@ -90,5 +124,10 @@ const styles = {
   btnDanger: {
     color: '#e74c3c',
     borderColor: '#e74c3c',
+  },
+  btnVendor: {
+    background: '#ff9800',
+    color: '#fff',
+    border: '0.5px solid #ff9800',
   },
 }

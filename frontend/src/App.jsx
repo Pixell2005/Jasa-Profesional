@@ -8,6 +8,9 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import BookingPage from './pages/BookingPage'
 import MyBookingPage from './pages/MyBookingPage'
+import VendorRegisterPage from './pages/VendorRegisterPage'
+import VendorDashboard from './pages/VendorDashboard'
+import AdminPanel from './pages/AdminPanel'
 import NotFoundPage from './pages/NotFoundPage'
 
 export default function App() {
@@ -34,6 +37,34 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <MyBookingPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ── Vendor Routes ── */}
+          <Route
+            path="/vendor/register"
+            element={
+              <ProtectedRoute>
+                <VendorRegisterPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/dashboard"
+            element={
+              <ProtectedRoute>
+                <VendorDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ── Admin Routes ── */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminPanel />
               </ProtectedRoute>
             }
           />
