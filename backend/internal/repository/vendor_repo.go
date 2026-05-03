@@ -28,7 +28,8 @@ func (r *VendorRepository) GetAll(category string) ([]model.Vendor, error) {
 			SELECT id, name, role, category, tags, rating, review_count,
 				   price, eta_hours, is_available, created_at
 			FROM vendors
-			WHERE category = $1 AND is_available = true
+			WHERE category = $1
+			  AND is_available = true
 			ORDER BY rating DESC
 			`
 		rows, err = r.db.Query(query, category)

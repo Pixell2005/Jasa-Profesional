@@ -36,18 +36,24 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	vendorRepo := repository.NewVendorRepository(db)
 	bookingRepo := repository.NewBookingRepository(db)
+	reviewRepo := repository.NewReviewRepository(db)
+	paymentRepo := repository.NewPaymentRepository(db)
 
 	// Service
 	authService := service.NewAuthService(userRepo, cfg.JWTSecret, cfg.JWTExpireHours)
 	vendorService := service.NewVendorService(vendorRepo, userRepo, bookingRepo)
 	bookingService := service.NewBookingService(bookingRepo, vendorRepo)
 	adminService := service.NewAdminService(userRepo, vendorRepo, bookingRepo)
+	reviewService := service.NewReviewService(reviewRepo, bookingRepo, vendorRepo)
+	paymentService := service.NewPaymentService(paymentRepo, bookingRepo)
 
 	// Handler
 	authHandler := handler.NewAuthHandler(authService, userRepo)
 	vendorHandler := handler.NewVendorHandler(vendorService)
 	bookingHandler := handler.NewBookingHandler(bookingService)
 	adminHandler := handler.NewAdminHandler(adminService)
+	reviewHandler := handler.NewReviewHandler(reviewService)
+	paymentHandler := handler.NewPaymentHandler(paymentService)
 
 	// ── 4. Setup Gin router ─────────────────────────────────────────
 	if cfg.AppEnv == "production" {
@@ -57,7 +63,8 @@ func main() {
 	router := gin.Default()
 
 	// Pasang CORS middleware di semua route
-	router.Use(middleware.CORSMiddleware())
+	// AllowedOrigin dibaca dari env ALLOWED_ORIGIN (default: http://localhost:5173)
+	router.Use(middleware.CORSMiddleware(cfg.AllowedOrigin))
 
 	// ── 5. Route PUBLIK — tidak butuh login ─────────────────────────
 	public := router.Group("/api/v1")
@@ -87,6 +94,14 @@ func main() {
 		protected.POST("/bookings", bookingHandler.Create)
 		protected.GET("/bookings/my", bookingHandler.GetMyBookings)
 		protected.GET("/bookings/:id", bookingHandler.GetByID)
+		protected.DELETE("/bookings/:id/cancel", bookingHandler.CancelBooking) // NEW
+
+		// Review - customer bisa review setelah booking completed
+		protected.POST("/bookings/:id/review", reviewHandler.CreateReview)   // NEW
+		protected.GET("/vendors/:id/reviews", reviewHandler.GetVendorReviews) // NEW
+
+		// Payment - tracking pembayaran
+		protected.GET("/bookings/:id/payment", paymentHandler.GetByBookingID) // NEW
 
 		// Vendor - register and profile
 		protected.POST("/vendors/register", vendorHandler.Register)

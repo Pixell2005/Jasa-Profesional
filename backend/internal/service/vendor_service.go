@@ -122,6 +122,7 @@ func (s *VendorService) GetVendorBookings(vendorID string) ([]model.Booking, err
 }
 
 // AcceptBooking - vendor accept booking
+// State machine: hanya booking dengan status 'pending' yang bisa di-accept
 func (s *VendorService) AcceptBooking(vendorID, bookingID string) error {
 	// Verify booking exists dan belongs to vendor
 	booking, err := s.bookingRepo.GetByID(bookingID)
@@ -134,11 +135,16 @@ func (s *VendorService) AcceptBooking(vendorID, bookingID string) error {
 	if booking.VendorID != vendorID {
 		return errors.New("akses ditolak")
 	}
+	// State machine guard
+	if booking.Status != "pending" {
+		return errors.New("hanya booking berstatus 'pending' yang bisa diterima (status sekarang: '" + booking.Status + "')")
+	}
 
 	return s.bookingRepo.UpdateStatus(bookingID, "accepted")
 }
 
 // RejectBooking - vendor reject booking
+// State machine: hanya booking dengan status 'pending' yang bisa di-reject
 func (s *VendorService) RejectBooking(vendorID, bookingID string) error {
 	// Verify booking exists dan belongs to vendor
 	booking, err := s.bookingRepo.GetByID(bookingID)
@@ -151,11 +157,16 @@ func (s *VendorService) RejectBooking(vendorID, bookingID string) error {
 	if booking.VendorID != vendorID {
 		return errors.New("akses ditolak")
 	}
+	// State machine guard
+	if booking.Status != "pending" {
+		return errors.New("hanya booking berstatus 'pending' yang bisa ditolak (status sekarang: '" + booking.Status + "')")
+	}
 
 	return s.bookingRepo.UpdateStatus(bookingID, "rejected")
 }
 
 // CompleteBooking - vendor mark booking as completed
+// State machine: hanya booking dengan status 'accepted' yang bisa di-complete
 func (s *VendorService) CompleteBooking(vendorID, bookingID string) error {
 	// Verify booking exists dan belongs to vendor
 	booking, err := s.bookingRepo.GetByID(bookingID)
@@ -168,28 +179,19 @@ func (s *VendorService) CompleteBooking(vendorID, bookingID string) error {
 	if booking.VendorID != vendorID {
 		return errors.New("akses ditolak")
 	}
+	// State machine guard: harus sudah accepted dulu sebelum bisa completed
+	if booking.Status != "accepted" {
+		return errors.New("hanya booking berstatus 'accepted' yang bisa diselesaikan (status sekarang: '" + booking.Status + "')")
+	}
 
 	return s.bookingRepo.UpdateStatus(bookingID, "completed")
 }
 
 // GetVendorBookingsWithCustomerDetails - ambil booking vendor dengan detail customer
+// FIX: Sebelumnya N+1 query (1 query utama + 1 per booking)
+// Sekarang menggunakan satu JOIN query langsung dari repo
 func (s *VendorService) GetVendorBookingsWithCustomerDetails(vendorID string) ([]model.BookingWithCustomer, error) {
-	bookings, err := s.bookingRepo.GetByVendorID(vendorID)
-	if err != nil {
-		return nil, err
-	}
-
-	var result []model.BookingWithCustomer
-	for _, booking := range bookings {
-		details, err := s.bookingRepo.GetWithCustomerDetails(booking.ID)
-		if err != nil {
-			continue
-		}
-		if details != nil {
-			result = append(result, *details)
-		}
-	}
-	return result, nil
+	return s.bookingRepo.GetAllByVendorIDWithCustomerDetails(vendorID)
 }
 
 // UpdateVendorProfile - update profil vendor

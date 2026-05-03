@@ -28,11 +28,15 @@ func (r *UserRepository) Create(user model.User) error {
 
 // FindByEmail - mencari user berdasarkan email
 // Dipakai saat login untuk verifikasi email dan password
+// Filter: is_active = true DAN deleted_at IS NULL (soft-deleted user tidak bisa login)
 func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
 	query := `
-		SELECT id, email, password, name, role, is_active, created_at
+		SELECT id, email, password, name, role, is_active, created_at,
+		       updated_at, last_login_at, last_logout_at, login_count, last_ip
 		FROM users
-		WHERE email = $1 AND is_active = true
+		WHERE email = $1
+		  AND is_active = true
+		  AND deleted_at IS NULL
 	`
 	user := &model.User{}
 	err := r.db.QueryRow(query, email).Scan(
@@ -43,6 +47,11 @@ func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
 		&user.Role,
 		&user.IsActive,
 		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.LastLoginAt,
+		&user.LastLogoutAt,
+		&user.LoginCount,
+		&user.LastIP,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -56,11 +65,15 @@ func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
 
 // FindByID - mencari user berdasarkan ID
 // Dipakai di endpoint /auth/me
+// Filter: is_active = true DAN deleted_at IS NULL
 func (r *UserRepository) FindByID(id string) (*model.User, error) {
 	query := `	
-		SELECT id, email, name, role, is_active, created_at
+		SELECT id, email, name, role, is_active, created_at,
+		       updated_at, last_login_at, last_logout_at, login_count, last_ip
 		FROM users
-		WHERE id = $1 AND is_active = true
+		WHERE id = $1
+		  AND is_active = true
+		  AND deleted_at IS NULL
 	`
 	user := &model.User{}
 	err := r.db.QueryRow(query, id).Scan(
@@ -70,6 +83,11 @@ func (r *UserRepository) FindByID(id string) (*model.User, error) {
 		&user.Role,
 		&user.IsActive,
 		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.LastLoginAt,
+		&user.LastLogoutAt,
+		&user.LoginCount,
+		&user.LastIP,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -80,8 +98,14 @@ func (r *UserRepository) FindByID(id string) (*model.User, error) {
 	return user, nil
 }
 
-// UpdateRole - update role user
+// UpdateRole - update role user dengan validasi role yang diperbolehkan
+// Hanya menerima: "customer", "vendor", "admin"
 func (r *UserRepository) UpdateRole(id string, role string) error {
+	// Guard: pastikan role yang di-set adalah nilai yang valid
+	validRoles := map[string]bool{"customer": true, "vendor": true, "admin": true}
+	if !validRoles[role] {
+		return errors.New("invalid role: hanya customer/vendor/admin yang diizinkan")
+	}
 	query := `
 		UPDATE users
 		SET role = $1

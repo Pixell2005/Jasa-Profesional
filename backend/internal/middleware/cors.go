@@ -6,11 +6,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CORSMiddleware - mengizinkan frontend React terhubung ke backend
-// Tanpa ini, browser akan memblokir semua request dari localhost:5173 ke localhost:8080
-func CORSMiddleware() gin.HandlerFunc {
+// CORSMiddleware - mengizinkan frontend terhubung ke backend
+// allowedOrigin dibaca dari config (env variable ALLOWED_ORIGIN)
+// Development default: "http://localhost:5173"
+// Production: set ALLOWED_ORIGIN=https://your-frontend-domain.com
+func CORSMiddleware(allowedOrigin string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "http://localhost:5173")
+		c.Header("Access-Control-Allow-Origin", allowedOrigin)
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		// Authorization wajib ada di sini agar browser izinkan frontend kirim token JWT
 		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")

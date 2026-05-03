@@ -351,30 +351,6 @@ const styles = {
   tableRow: {
     borderBottom: '1px solid #eee',
   },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-
-    'thead tr': {
-      backgroundColor: '#f5f5f5',
-      borderBottom: '1px solid #ddd',
-    },
-    'tbody tr': {
-      borderBottom: '1px solid #eee',
-      '&:hover': {
-        backgroundColor: '#fafafa',
-      }
-    },
-    'th, td': {
-      padding: '12px',
-      textAlign: 'left',
-      fontSize: '13px',
-    },
-    'th': {
-      fontWeight: '600',
-      color: '#333',
-    }
-  },
   email: {
     fontSize: '12px',
     color: '#666',

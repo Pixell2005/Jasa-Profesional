@@ -11,14 +11,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// jwtClaims - isi data  yang disimpan di dalam token JWT
-// Ini yang bisa dibaca tanpa decrypt, tapi tidak bisa dipalsukan
-type jwtClaims struct {
-	UserId string `json:"user_id"`
-	Email  string `json:"email"`
-	Role   string `json:"role"`
-	jwt.RegisteredClaims
-}
+// jwtClaims — alias ke model.JWTClaims yang sudah di-export
+// Tidak perlu definisi ulang di sini, cukup pakai model.JWTClaims
 
 type AuthService struct {
 	userRepo       *repository.UserRepository
@@ -35,7 +29,7 @@ func NewAuthService(userRepo *repository.UserRepository, jwtSecret string, jwtEx
 }
 
 func (s *AuthService) generateToken(user *model.User) (string, error) {
-	claims := jwtClaims{
+	claims := model.JWTClaims{
 		UserId: user.ID,
 		Email:  user.Email,
 		Role:   user.Role,

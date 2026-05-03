@@ -62,7 +62,12 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	result, err := h.authService.Login(req)
+	// Ambil IP client untuk disimpan ke metadata login
+	// c.ClientIP() sudah menangani X-Forwarded-For dan X-Real-IP
+	clientIP := c.ClientIP()
+
+	// Panggil LoginWithMetadata agar last_ip, login_count, last_login_at ter-update
+	result, err := h.authService.LoginWithMetadata(req, clientIP)
 	if err != nil {
 		// Return 401 untuk semua error login - tidak membedakan "email salah" atau "password salah"
 
