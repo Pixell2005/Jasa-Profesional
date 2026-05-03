@@ -1,0 +1,8 @@
+.env
+*.exe
+/bin
+vendor/
+
+# Documentation files
+API_DOCUMENTATION.md
+DEVELOPMENT_GUIDE.md
