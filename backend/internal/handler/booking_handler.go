@@ -97,3 +97,33 @@ func (h *BookingHandler) GetMyBookings(c *gin.Context) {
 		Data:    bookings,
 	})
 }
+
+// CancelBooking - DELETE /api/v1/bookings/:id/cancel
+// PROTECTED: customer cancel booking miliknya sendiri (hanya pending/accepted)
+func (h *BookingHandler) CancelBooking(c *gin.Context) {
+	id := c.Param("id")
+	customerID := middleware.GetUserID(c)
+
+	var body struct {
+		Reason string `json:"reason"`
+	}
+	// Reason bersifat optional, tidak masalah jika bind gagal
+	_ = c.ShouldBindJSON(&body)
+
+	if err := h.bookingService.CancelBooking(id, customerID, body.Reason); err != nil {
+		status := http.StatusBadRequest
+		if err.Error() == "akses ditolak" {
+			status = http.StatusForbidden
+		}
+		c.JSON(status, model.Response{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.Response{
+		Success: true,
+		Message: "booking berhasil dibatalkan",
+	})
+}

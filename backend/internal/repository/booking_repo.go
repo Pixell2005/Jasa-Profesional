@@ -287,3 +287,48 @@ func (r *BookingRepository) Cancel(bookingID string, reason string) error {
 	_, err := r.db.Exec(query, reason, bookingID)
 	return err
 }
+
+// GetAllByVendorIDWithCustomerDetails - ambil semua booking vendor beserta detail customer
+// FIX N+1: menggunakan satu JOIN query alih-alih loop + per-booking query
+// Sebelumnya: 1 + N query (GetByVendorID + GetWithCustomerDetails per booking)
+// Sekarang: cukup 1 query
+func (r *BookingRepository) GetAllByVendorIDWithCustomerDetails(vendorID string) ([]model.BookingWithCustomer, error) {
+	query := `
+		SELECT
+			b.id, b.vendor_id, b.customer_id, u.name, u.email,
+			b.service_date, b.service_time, b.address, b.notes,
+			b.status, b.total_price, b.admin_fee, b.created_at, b.updated_at,
+			COALESCE(up.phone, '') AS customer_phone
+		FROM bookings b
+		JOIN users u ON b.customer_id = u.id
+		LEFT JOIN (
+			SELECT user_id, phone FROM vendors
+		) up ON up.user_id = u.id
+		WHERE b.vendor_id = $1
+		ORDER BY b.created_at DESC
+	`
+	rows, err := r.db.Query(query, vendorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []model.BookingWithCustomer
+	for rows.Next() {
+		var bwc model.BookingWithCustomer
+		err := rows.Scan(
+			&bwc.ID, &bwc.VendorID, &bwc.CustomerID, &bwc.CustomerName, &bwc.CustomerEmail,
+			&bwc.ServiceDate, &bwc.ServiceTime, &bwc.Address, &bwc.Notes,
+			&bwc.Status, &bwc.TotalPrice, &bwc.AdminFee, &bwc.CreatedAt, &bwc.UpdatedAt,
+			&bwc.CustomerPhone,
+		)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, bwc)
+	}
+	if result == nil {
+		result = []model.BookingWithCustomer{}
+	}
+	return result, nil
+}

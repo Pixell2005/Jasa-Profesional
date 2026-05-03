@@ -4,16 +4,13 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/daniel/jasa-profesional/internal/model"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type jwtClaims struct {
-	UserId string `json:"user_id"`
-	Email  string `json:"email"`
-	Role   string `json:"role"`
-	jwt.RegisteredClaims
-}
+// jwtClaims — menggunakan model.JWTClaims yang sudah di-export
+// agar tidak ada duplikasi definisi struct antara service dan middleware
 
 // AuthRequired - middleware yang memblokir request tanpa JWT yang valid
 // Cara kerja: dipasang di depan route, dijalankan sebelum handler
@@ -44,7 +41,7 @@ func AuthRequired(jwtSecret string) gin.HandlerFunc {
 		tokenString := parts[1]
 
 		// 3. Parse dan verifikasi token
-		claims := &jwtClaims{}
+		claims := &model.JWTClaims{}
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			// Pastikan algoritma yang dipakai adalah HS256
 			// Mencegah serangan "none alrgorithm" - token tanpa tanda tangan

@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+)
 
 // ============================================================
 // USER MODEL - Merepresentasikan tabel users di database
@@ -58,6 +62,11 @@ type User struct {
 	// Digunakan untuk security monitoring
 	// Null jika belum pernah login
 	LastIP *string `json:"last_ip,omitempty" db:"last_ip"`
+
+	// DeletedAt: Timestamp soft-delete user
+	// Null jika user masih aktif
+	// Diset saat admin men-deactivate user secara permanen
+	DeletedAt *time.Time `json:"deleted_at,omitempty" db:"deleted_at"`
 }
 
 // ============================================================
@@ -125,7 +134,12 @@ type Vendor struct {
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 
 	// UpdatedAt: Timestamp update terakhir
-	UpdatedAt *time.Time `json:"updated_at,omitempty" db:"updated_at"`
+	// Di-update otomatis oleh trigger vendors_set_updated_at
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+
+	// DeletedAt: Timestamp soft-delete vendor
+	// Null jika vendor masih aktif
+	DeletedAt *time.Time `json:"deleted_at,omitempty" db:"deleted_at"`
 }
 
 // ============================================================
@@ -386,4 +400,107 @@ type Response struct {
 	// Data: Payload data hasil operation (optional)
 	// Diisi jika Success=true dan ada data yang dikembalikan
 	Data interface{} `json:"data,omitempty"`
+}
+
+// ============================================================
+// JWT CLAIMS — Dipindahkan ke sini agar tidak duplikat
+// antara auth_service.go dan middleware/auth.go
+// ============================================================
+
+// JWTClaims: Isi payload yang disimpan di dalam token JWT
+// Bisa dibaca tanpa decrypt, tapi tidak bisa dipalsukan tanpa secret
+type JWTClaims struct {
+	// UserId: UUID user yang login
+	UserId string `json:"user_id"`
+
+	// Email: Email user untuk identifikasi tambahan
+	Email string `json:"email"`
+
+	// Role: Role user (customer/vendor/admin) untuk RBAC
+	Role string `json:"role"`
+
+	jwt.RegisteredClaims
+}
+
+// ============================================================
+// REVIEW MODEL — Merepresentasikan tabel reviews di database
+// ============================================================
+// Review adalah penilaian dari customer ke vendor setelah layanan selesai.
+// Setiap booking hanya boleh diulas satu kali (UNIQUE booking_id).
+
+type Review struct {
+	// ID: UUID unik untuk setiap review
+	ID string `json:"id" db:"id"`
+
+	// BookingID: Foreign key ke tabel bookings
+	// UNIQUE — satu booking hanya bisa punya satu review
+	BookingID string `json:"booking_id" db:"booking_id"`
+
+	// VendorID: Foreign key ke tabel vendors
+	// Dipakai untuk update rating vendor secara efisien
+	VendorID string `json:"vendor_id" db:"vendor_id"`
+
+	// CustomerID: Foreign key ke tabel users
+	// User yang menulis review
+	CustomerID string `json:"customer_id" db:"customer_id"`
+
+	// Rating: Nilai rating dari customer
+	// Range: 1-5 (CHECK constraint di DB)
+	Rating int `json:"rating" db:"rating"`
+
+	// Comment: Komentar/ulasan teks dari customer (optional)
+	Comment string `json:"comment" db:"comment"`
+
+	// CreatedAt: Timestamp pembuatan review
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+}
+
+// ReviewRequest: Payload untuk POST /api/v1/bookings/:id/review
+type ReviewRequest struct {
+	// Rating: Nilai rating 1-5
+	// Validation: required, min=1, max=5
+	Rating int `json:"rating" binding:"required,min=1,max=5"`
+
+	// Comment: Komentar ulasan (optional)
+	Comment string `json:"comment"`
+}
+
+// ============================================================
+// PAYMENT MODEL — Merepresentasikan tabel payments di database
+// ============================================================
+// Payment adalah record pembayaran untuk setiap booking.
+// Status lifecycle: pending → paid / failed / refunded
+
+type Payment struct {
+	// ID: UUID unik untuk setiap payment record
+	ID string `json:"id" db:"id"`
+
+	// BookingID: Foreign key ke tabel bookings
+	BookingID string `json:"booking_id" db:"booking_id"`
+
+	// CustomerID: Foreign key ke tabel users
+	CustomerID string `json:"customer_id" db:"customer_id"`
+
+	// Amount: Jumlah yang harus dibayar (dalam Rupiah)
+	Amount int `json:"amount" db:"amount"`
+
+	// PaymentMethod: Metode pembayaran
+	// Possible values: "credit_card", "bank_transfer", "e_wallet"
+	PaymentMethod string `json:"payment_method" db:"payment_method"`
+
+	// Status: Status pembayaran
+	// Possible values: "pending", "paid", "failed", "refunded"
+	Status string `json:"status" db:"status"`
+
+	// TransactionID: ID transaksi dari payment gateway (optional)
+	TransactionID string `json:"transaction_id,omitempty" db:"transaction_id"`
+
+	// PaidAt: Timestamp pembayaran berhasil (null jika belum bayar)
+	PaidAt *time.Time `json:"paid_at,omitempty" db:"paid_at"`
+
+	// CreatedAt: Timestamp pembuatan record payment
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+
+	// UpdatedAt: Timestamp update terakhir status payment
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }

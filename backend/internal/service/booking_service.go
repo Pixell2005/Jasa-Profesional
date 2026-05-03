@@ -102,3 +102,23 @@ func (s *BookingService) GetMyBookings(customerID string) ([]model.Booking, erro
 	}
 	return bookings, nil
 }
+
+// CancelBooking - customer cancel booking
+// Hanya bisa cancel booking miliknya sendiri dengan status pending atau accepted
+func (s *BookingService) CancelBooking(bookingID string, customerID string, reason string) error {
+	booking, err := s.bookingRepo.GetByID(bookingID)
+	if err != nil {
+		return err
+	}
+	if booking == nil {
+		return errors.New("booking tidak ditemukan")
+	}
+	if booking.CustomerID != customerID {
+		return errors.New("akses ditolak")
+	}
+	// State machine: hanya pending atau accepted yang bisa dicancel
+	if booking.Status != "pending" && booking.Status != "accepted" {
+		return errors.New("booking dengan status '" + booking.Status + "' tidak bisa dicancel")
+	}
+	return s.bookingRepo.Cancel(bookingID, reason)
+}
