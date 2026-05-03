@@ -68,6 +68,47 @@ export const vendorAPI = {
   // Ambil detail satu vendor
   getByID: (id) =>
     fetch(`${BASE_URL}/vendors/${id}`).then(handleResponse),
+
+  // Daftar sebagai vendor — butuh login
+  register: (data) =>
+    fetch(`${BASE_URL}/vendors/register`, {
+      method: 'POST',
+      headers: authHeader(),
+      body: JSON.stringify(data),
+    }).then(handleResponse),
+
+  // Ambil profile vendor sendiri
+  getProfile: () =>
+    fetch(`${BASE_URL}/vendors/profile`, {
+      headers: authHeader(),
+    }).then(handleResponse),
+
+  // Ambil semua booking yang masuk untuk vendor
+  getBookings: () =>
+    fetch(`${BASE_URL}/vendors/bookings`, {
+      headers: authHeader(),
+    }).then(handleResponse),
+
+  // Terima booking
+  acceptBooking: (bookingId) =>
+    fetch(`${BASE_URL}/vendors/bookings/${bookingId}/accept`, {
+      method: 'PUT',
+      headers: authHeader(),
+    }).then(handleResponse),
+
+  // Tolak booking
+  rejectBooking: (bookingId) =>
+    fetch(`${BASE_URL}/vendors/bookings/${bookingId}/reject`, {
+      method: 'PUT',
+      headers: authHeader(),
+    }).then(handleResponse),
+
+  // Selesaikan booking
+  completeBooking: (bookingId) =>
+    fetch(`${BASE_URL}/vendors/bookings/${bookingId}/complete`, {
+      method: 'PUT',
+      headers: authHeader(),
+    }).then(handleResponse),
 }
 
 // ══════════════════════════════════════════════════════════
@@ -92,6 +133,30 @@ export const bookingAPI = {
   // Ambil detail satu booking
   getByID: (id) =>
     fetch(`${BASE_URL}/bookings/${id}`, {
+      headers: authHeader(),
+    }).then(handleResponse),
+}
+
+// ══════════════════════════════════════════════════════════
+// ADMIN
+// ══════════════════════════════════════════════════════════
+
+export const adminAPI = {
+  // Ambil dashboard stats
+  getDashboard: () =>
+    fetch(`${BASE_URL}/admin/dashboard`, {
+      headers: authHeader(),
+    }).then(handleResponse),
+
+  // Ambil semua users
+  getAllUsers: () =>
+    fetch(`${BASE_URL}/admin/users`, {
+      headers: authHeader(),
+    }).then(handleResponse),
+
+  // Ambil semua vendors
+  getAllVendors: () =>
+    fetch(`${BASE_URL}/admin/vendors`, {
       headers: authHeader(),
     }).then(handleResponse),
 }
