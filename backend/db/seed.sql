@@ -1,4 +1,4 @@
-﻿-- ============================================
+-- ============================================
 -- SEED DATA - UPGRADED
 -- ============================================
 --
@@ -22,7 +22,7 @@
 INSERT INTO users (email, password, name, role, is_active, created_at, updated_at, last_login_at, last_logout_at, login_count, last_ip)
 VALUES (
     'customer1@test.com',
-    '<HASH_customer1>',        -- go run ./cmd/hash-gen → password: Cust_Adi_2024!
+    '$2a$10$i505y7aa9C6SC8zvh4yWeeK6kCMM2KNWlXFiR3ttxhcc/pAjB34.O', -- password: Cust_Adi_2024!
     'Adi Suryanto', 'customer', true,
     NOW() - INTERVAL '30 days',
     NOW() - INTERVAL '1 day',
@@ -35,7 +35,7 @@ VALUES (
 INSERT INTO users (email, password, name, role, is_active, created_at, updated_at, last_login_at, last_logout_at, login_count, last_ip)
 VALUES (
     'customer2@test.com',
-    '<HASH_customer2>',        -- password: Cust_Budi_2024!
+    '$2a$10$2y2/RzqWWVplbFpn02bcz.KgydkmnpZoaGJXL6v/A.whlmjdmFJf.', -- password: Cust_Budi_2024!
     'Budi Santoso', 'customer', true,
     NOW() - INTERVAL '25 days',
     NOW() - INTERVAL '5 days',
@@ -48,7 +48,7 @@ VALUES (
 INSERT INTO users (email, password, name, role, is_active, created_at, updated_at, last_login_at, last_logout_at, login_count, last_ip)
 VALUES (
     'customer3@test.com',
-    '<HASH_customer3>',        -- password: Cust_Citra_2024!
+    '$2a$10$ABj7F8oF5YafDv8uHUFfKeUET.e/qcRMUgKQsUlVWhHl/FJjI5NQe', -- password: Cust_Citra_2024!
     'Citra Dewi', 'customer', true,
     NOW() - INTERVAL '20 days',
     NOW() - INTERVAL '3 hours',
@@ -61,7 +61,7 @@ VALUES (
 INSERT INTO users (email, password, name, role, is_active, created_at, updated_at, last_login_at, last_logout_at, login_count, last_ip)
 VALUES (
     'customer4@test.com',
-    '<HASH_customer4>',        -- password: Cust_Deni_2024!
+    '$2a$10$1X7qVT.VPUec.BOD3R3RU.sDCSfTcapcVEK4v6hZk5PCUchOCc3Vm', -- password: Cust_Deni_2024!
     'Deni Hermawan', 'customer', true,
     NOW() - INTERVAL '15 days',
     NOW() - INTERVAL '10 days',
@@ -74,7 +74,7 @@ VALUES (
 INSERT INTO users (email, password, name, role, is_active, created_at, updated_at, last_login_at, last_logout_at, login_count, last_ip)
 VALUES (
     'customer5@test.com',
-    '<HASH_customer5>',        -- password: Cust_Eka_2024!
+    '$2a$10$lyBBjO/sen0LmDO11c4U6.Qv2kPwrZTLuV2GJ3fsVQanmHr2tk6.O', -- password: Cust_Eka_2024!
     'Eka Putri', 'customer', true,
     NOW() - INTERVAL '7 days',
     NOW() - INTERVAL '7 days',
@@ -92,7 +92,7 @@ VALUES (
 INSERT INTO users (email, password, name, role, is_active, created_at, updated_at, last_login_at, last_logout_at, login_count, last_ip)
 VALUES (
     'vendor1@test.com',
-    '<HASH_vendor1>',          -- password: Vend_Ahmad_2024!
+    '$2a$10$hds6hAwARgV.wkMJSZXnyOpS7wYXooAUQ8UUUDqfMmAS0Fo8IplRS', -- password: Vend_Ahmad_2024!
     'Ahmad Ali', 'vendor', true,
     NOW() - INTERVAL '60 days',
     NOW() - INTERVAL '1 hour',
@@ -105,7 +105,7 @@ VALUES (
 INSERT INTO users (email, password, name, role, is_active, created_at, updated_at, last_login_at, last_logout_at, login_count, last_ip)
 VALUES (
     'vendor2@test.com',
-    '<HASH_vendor2>',          -- password: Vend_Baskoro_2024!
+    '$2a$10$mgw60/02spQyoprFBJQ.auaFo/EphNLaSlInkzJS4Ezt0hPLyd3O6', -- password: Vend_Baskoro_2024!
     'Baskoro Jaya', 'vendor', true,
     NOW() - INTERVAL '45 days',
     NOW() - INTERVAL '6 hours',
@@ -118,7 +118,7 @@ VALUES (
 INSERT INTO users (email, password, name, role, is_active, created_at, updated_at, last_login_at, last_logout_at, login_count, last_ip)
 VALUES (
     'vendor3@test.com',
-    '<HASH_vendor3>',          -- password: Vend_Citra_2024!
+    '$2a$10$ugm4BVv7/ppMHH4q2BCPmuyppJqwyUSgLcY/l/wdr7ns38/45Q6i2', -- password: Vend_Citra_2024!
     'Citra Jasa', 'vendor', true,
     NOW() - INTERVAL '40 days',
     NOW() - INTERVAL '2 days',
@@ -131,7 +131,7 @@ VALUES (
 INSERT INTO users (email, password, name, role, is_active, created_at, updated_at, last_login_at, last_logout_at, login_count, last_ip)
 VALUES (
     'vendor4@test.com',
-    '<HASH_vendor4>',          -- password: Vend_Dian_2024!
+    '$2a$10$8g04x5.QvQcz4sZoadkH/.9j8ig0.9628vURVa4tR//kp/j6390Xy', -- password: Vend_Dian_2024!
     'Dian Sartika', 'vendor', true,
     NOW() - INTERVAL '30 days',
     NOW() - INTERVAL '12 hours',
@@ -144,7 +144,7 @@ VALUES (
 INSERT INTO users (email, password, name, role, is_active, created_at, updated_at, last_login_at, last_logout_at, login_count, last_ip)
 VALUES (
     'vendor5@test.com',
-    '<HASH_vendor5>',          -- password: Vend_Eka_2024!
+    '$2a$10$tqT3fTwR06PZkCugsxDP6unXuiGdiLJGa5yLFcXyZKUmKJHSdUddm', -- password: Vend_Eka_2024!
     'Eka Service', 'vendor', true,
     NOW() - INTERVAL '14 days',
     NOW() - INTERVAL '3 days',
@@ -162,7 +162,7 @@ VALUES (
 INSERT INTO users (email, password, name, role, is_active, created_at, updated_at, last_login_at, last_logout_at, login_count, last_ip)
 VALUES (
     'admin@test.com',
-    '<HASH_admin>',            -- password: Adm!n_Sys_2024#
+    '$2a$10$xUbaq4z9Xnq05B/TA772YOpvGEFda0/BDMdShdljzn3yyQg3POI5W', -- password: Adm!n_Sys_2024#
     'Admin System', 'admin', true,
     NOW() - INTERVAL '90 days',
     NOW() - INTERVAL '30 minutes',

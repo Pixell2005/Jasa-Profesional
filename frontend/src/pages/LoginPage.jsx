@@ -22,10 +22,20 @@ export default function LoginPage() {
     setError('')
 
     try {
-      await login(form.email, form.password)
-      navigate('/') // login berhasil → ke halaman utama
+      const loggedInUser = await login(form.email, form.password)
+      // Redirect berdasarkan role:
+      // - admin → langsung ke panel admin
+      // - vendor → langsung ke dashboard vendor
+      // - customer → ke halaman utama
+      if (loggedInUser?.role === 'admin') {
+        navigate('/admin')
+      } else if (loggedInUser?.role === 'vendor') {
+        navigate('/vendor/dashboard')
+      } else {
+        navigate('/')
+      }
     } catch (err) {
-      setError(err.message) // tampilkan pesan error dari server
+      setError(err.message)
     } finally {
       setIsLoading(false)
     }
