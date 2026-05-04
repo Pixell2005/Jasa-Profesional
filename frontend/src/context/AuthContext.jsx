@@ -43,7 +43,8 @@ export function AuthProvider({ children }) {
     // Simpan token ke localStorage agar tetap ada setelah refresh
     localStorage.setItem('token', res.data.token)
     setUser(res.data.user)
-    return res
+    // Return user object agar caller bisa redirect berdasarkan role
+    return res.data.user
   }
 
   // ── Register ──────────────────────────────────────────────
