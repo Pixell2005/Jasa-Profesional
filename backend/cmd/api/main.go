@@ -107,6 +107,8 @@ func main() {
 		// Vendor - register and profile
 		protected.POST("/vendors/register", vendorHandler.Register)
 		protected.GET("/vendors/profile", vendorHandler.GetProfile)
+		protected.PUT("/vendors/profile", vendorHandler.UpdateProfile)       // NEW: edit profil vendor
+		protected.PUT("/vendors/availability", vendorHandler.SetAvailability) // NEW: buka/tutup penerimaan
 
 		// Vendor - booking management
 		protected.GET("/vendors/bookings", vendorHandler.GetBookings)
@@ -121,6 +123,8 @@ func main() {
 			admin.GET("/dashboard", adminHandler.GetDashboard)
 			admin.GET("/users", adminHandler.GetAllUsers)
 			admin.GET("/vendors", adminHandler.GetAllVendors)
+			admin.PUT("/users/:id/suspend", adminHandler.SuspendUser)   // NEW: suspend user
+			admin.PUT("/users/:id/activate", adminHandler.ActivateUser) // NEW: aktifkan user
 		}
 	}
 
