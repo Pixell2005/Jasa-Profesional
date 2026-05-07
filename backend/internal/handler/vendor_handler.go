@@ -112,11 +112,10 @@ func (h *VendorHandler) GetProfile(c *gin.Context) {
 }
 
 // GetBookings — GET /api/v1/vendors/bookings
-// Endpoint PROTECTED — vendor lihat booking yang masuk
+// Endpoint PROTECTED — vendor lihat booking yang masuk beserta info customer
 func (h *VendorHandler) GetBookings(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 
-	// Get vendor profile to get vendorID
 	vendor, err := h.vendorService.GetVendorProfile(userID)
 	if err != nil {
 		c.JSON(http.StatusForbidden, model.Response{
@@ -126,7 +125,8 @@ func (h *VendorHandler) GetBookings(c *gin.Context) {
 		return
 	}
 
-	bookings, err := h.vendorService.GetVendorBookings(vendor.ID)
+	// Pakai versi dengan detail customer (nama, email, telp)
+	bookings, err := h.vendorService.GetVendorBookingsWithCustomerDetails(vendor.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.Response{
 			Success: false,
@@ -138,6 +138,97 @@ func (h *VendorHandler) GetBookings(c *gin.Context) {
 	c.JSON(http.StatusOK, model.Response{
 		Success: true,
 		Data:    bookings,
+	})
+}
+
+// UpdateProfile — PUT /api/v1/vendors/profile
+// Endpoint PROTECTED — vendor update profil bisnis mereka
+func (h *VendorHandler) UpdateProfile(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+
+	vendor, err := h.vendorService.GetVendorProfile(userID)
+	if err != nil {
+		c.JSON(http.StatusForbidden, model.Response{
+			Success: false,
+			Message: "anda bukan vendor",
+		})
+		return
+	}
+
+	var req struct {
+		Name     string   `json:"name" binding:"required,min=3"`
+		Bio      string   `json:"bio"`
+		Phone    string   `json:"phone" binding:"required"`
+		Price    int      `json:"price" binding:"required,gt=0"`
+		EtaHours int      `json:"eta_hours" binding:"required,gt=0"`
+		Tags     []string `json:"tags"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{
+			Success: false,
+			Message: "data tidak valid: " + err.Error(),
+		})
+		return
+	}
+
+	if err := h.vendorService.UpdateVendorProfile(vendor.ID, req.Name, req.Bio, req.Phone, req.Price, req.EtaHours); err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{
+			Success: false,
+			Message: "gagal update profil: " + err.Error(),
+		})
+		return
+	}
+
+	if req.Tags != nil {
+		_ = h.vendorService.UpdateVendorTags(vendor.ID, req.Tags)
+	}
+
+	c.JSON(http.StatusOK, model.Response{
+		Success: true,
+		Message: "profil berhasil diperbarui",
+	})
+}
+
+// SetAvailability — PUT /api/v1/vendors/availability
+// Endpoint PROTECTED — vendor buka/tutup penerimaan booking
+func (h *VendorHandler) SetAvailability(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+
+	vendor, err := h.vendorService.GetVendorProfile(userID)
+	if err != nil {
+		c.JSON(http.StatusForbidden, model.Response{
+			Success: false,
+			Message: "anda bukan vendor",
+		})
+		return
+	}
+
+	var req struct {
+		IsAvailable bool `json:"is_available"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{
+			Success: false,
+			Message: "data tidak valid",
+		})
+		return
+	}
+
+	if err := h.vendorService.SetAvailability(vendor.ID, req.IsAvailable); err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{
+			Success: false,
+			Message: "gagal update ketersediaan: " + err.Error(),
+		})
+		return
+	}
+
+	msg := "Anda sekarang menerima booking"
+	if !req.IsAvailable {
+		msg = "Anda sekarang tidak menerima booking baru"
+	}
+	c.JSON(http.StatusOK, model.Response{
+		Success: true,
+		Message: msg,
 	})
 }
 

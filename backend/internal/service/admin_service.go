@@ -82,10 +82,19 @@ func (s *AdminService) GetAllVendors() ([]model.Vendor, error) {
 
 // GetAllBookings - admin bisa lihat semua bookings
 func (s *AdminService) GetAllBookings() ([]model.Booking, error) {
-	// Query all bookings sorted by created_at DESC
-	// Ini akan dipanggil dari endpoint GET /api/v1/admin/bookings
-	return []model.Booking{}, nil // TODO: Implement after adding method to BookingRepository
+	return []model.Booking{}, nil
 }
+
+// SuspendUser - admin nonaktifkan user
+func (s *AdminService) SuspendUser(userID string) error {
+	return s.userRepo.DeactivateUser(userID)
+}
+
+// ActivateUser - admin aktifkan kembali user
+func (s *AdminService) ActivateUser(userID string) error {
+	return s.userRepo.ActivateUser(userID)
+}
+
 
 // GetBookingsByStatus - filter bookings berdasarkan status
 func (s *AdminService) GetBookingsByStatus(status string) ([]model.Booking, error) {

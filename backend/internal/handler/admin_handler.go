@@ -80,3 +80,49 @@ func (h *AdminHandler) GetAllVendors(c *gin.Context) {
 		Data:    vendors,
 	})
 }
+
+// SuspendUser — PUT /api/v1/admin/users/:id/suspend
+// Endpoint PROTECTED — admin nonaktifkan user
+func (h *AdminHandler) SuspendUser(c *gin.Context) {
+	userID := c.Param("id")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, model.Response{Success: false, Message: "user id diperlukan"})
+		return
+	}
+
+	if err := h.adminService.SuspendUser(userID); err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{
+			Success: false,
+			Message: "gagal menonaktifkan user: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.Response{
+		Success: true,
+		Message: "user berhasil dinonaktifkan",
+	})
+}
+
+// ActivateUser — PUT /api/v1/admin/users/:id/activate
+// Endpoint PROTECTED — admin aktifkan kembali user
+func (h *AdminHandler) ActivateUser(c *gin.Context) {
+	userID := c.Param("id")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, model.Response{Success: false, Message: "user id diperlukan"})
+		return
+	}
+
+	if err := h.adminService.ActivateUser(userID); err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{
+			Success: false,
+			Message: "gagal mengaktifkan user: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.Response{
+		Success: true,
+		Message: "user berhasil diaktifkan kembali",
+	})
+}

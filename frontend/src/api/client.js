@@ -1,35 +1,24 @@
 // src/api/client.js
-// Semua komunikasi dengan backend dikumpulkan di satu tempat
-// Supaya kalau URL backend berubah, cukup ubah di sini saja
 
 const BASE_URL = 'http://localhost:8080/api/v1'
 
-// ── Helper: ambil token dari localStorage ──────────────────
 const getToken = () => localStorage.getItem('token')
 
-// ── Helper: buat header standar dengan token JWT ───────────
 const authHeader = () => ({
   'Content-Type': 'application/json',
   'Authorization': `Bearer ${getToken()}`,
 })
 
-// ── Helper: proses response dari server ────────────────────
-// Kalau server return error (4xx, 5xx), kita throw supaya bisa di-catch
 const handleResponse = async (res) => {
   const data = await res.json()
-  if (!res.ok) {
-    // Ambil pesan error dari server, kalau tidak ada pakai default
-    throw new Error(data.message || 'Terjadi kesalahan')
-  }
+  if (!res.ok) throw new Error(data.message || 'Terjadi kesalahan')
   return data
 }
 
 // ══════════════════════════════════════════════════════════
 // AUTH
 // ══════════════════════════════════════════════════════════
-
 export const authAPI = {
-  // Daftar akun baru
   register: (name, email, password) =>
     fetch(`${BASE_URL}/auth/register`, {
       method: 'POST',
@@ -37,7 +26,6 @@ export const authAPI = {
       body: JSON.stringify({ name, email, password }),
     }).then(handleResponse),
 
-  // Login — return { token, user }
   login: (email, password) =>
     fetch(`${BASE_URL}/auth/login`, {
       method: 'POST',
@@ -45,13 +33,8 @@ export const authAPI = {
       body: JSON.stringify({ email, password }),
     }).then(handleResponse),
 
-  // Cek siapa user yang sedang login (pakai token)
-  me: () =>
-    fetch(`${BASE_URL}/auth/me`, {
-      headers: authHeader(),
-    }).then(handleResponse),
+  me: () => fetch(`${BASE_URL}/auth/me`, { headers: authHeader() }).then(handleResponse),
 
-  // Reset password — perlu email + nama terdaftar + password baru
   forgotPassword: (email, name, newPassword) =>
     fetch(`${BASE_URL}/auth/forgot-password`, {
       method: 'POST',
@@ -59,33 +42,32 @@ export const authAPI = {
       body: JSON.stringify({ email, name, new_password: newPassword }),
     }).then(handleResponse),
 
-  // Ganti password — user harus login, perlu password lama
   changePassword: (oldPassword, newPassword) =>
     fetch(`${BASE_URL}/auth/change-password`, {
       method: 'PUT',
       headers: authHeader(),
       body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
     }).then(handleResponse),
+
+  updateProfile: (name, email) =>
+    fetch(`${BASE_URL}/auth/profile`, {
+      method: 'PUT',
+      headers: authHeader(),
+      body: JSON.stringify({ name, email }),
+    }).then(handleResponse),
 }
 
 // ══════════════════════════════════════════════════════════
 // VENDOR
 // ══════════════════════════════════════════════════════════
-
 export const vendorAPI = {
-  // Ambil semua vendor, bisa filter by category
   getAll: (category = '') => {
-    const url = category
-      ? `${BASE_URL}/vendors?category=${category}`
-      : `${BASE_URL}/vendors`
+    const url = category ? `${BASE_URL}/vendors?category=${category}` : `${BASE_URL}/vendors`
     return fetch(url).then(handleResponse)
   },
 
-  // Ambil detail satu vendor
-  getByID: (id) =>
-    fetch(`${BASE_URL}/vendors/${id}`).then(handleResponse),
+  getByID: (id) => fetch(`${BASE_URL}/vendors/${id}`).then(handleResponse),
 
-  // Daftar sebagai vendor — butuh login
   register: (data) =>
     fetch(`${BASE_URL}/vendors/register`, {
       method: 'POST',
@@ -93,62 +75,78 @@ export const vendorAPI = {
       body: JSON.stringify(data),
     }).then(handleResponse),
 
-  // Ambil profile vendor sendiri
   getProfile: () =>
+    fetch(`${BASE_URL}/vendors/profile`, { headers: authHeader() }).then(handleResponse),
+
+  updateProfile: (data) =>
     fetch(`${BASE_URL}/vendors/profile`, {
+      method: 'PUT',
       headers: authHeader(),
+      body: JSON.stringify(data),
     }).then(handleResponse),
 
-  // Ambil semua booking yang masuk untuk vendor
+  setAvailability: (isAvailable) =>
+    fetch(`${BASE_URL}/vendors/availability`, {
+      method: 'PUT',
+      headers: authHeader(),
+      body: JSON.stringify({ is_available: isAvailable }),
+    }).then(handleResponse),
+
   getBookings: () =>
-    fetch(`${BASE_URL}/vendors/bookings`, {
-      headers: authHeader(),
-    }).then(handleResponse),
+    fetch(`${BASE_URL}/vendors/bookings`, { headers: authHeader() }).then(handleResponse),
 
-  // Terima booking
   acceptBooking: (bookingId) =>
     fetch(`${BASE_URL}/vendors/bookings/${bookingId}/accept`, {
-      method: 'PUT',
-      headers: authHeader(),
+      method: 'PUT', headers: authHeader(),
     }).then(handleResponse),
 
-  // Tolak booking
   rejectBooking: (bookingId) =>
     fetch(`${BASE_URL}/vendors/bookings/${bookingId}/reject`, {
-      method: 'PUT',
-      headers: authHeader(),
+      method: 'PUT', headers: authHeader(),
     }).then(handleResponse),
 
-  // Selesaikan booking
   completeBooking: (bookingId) =>
     fetch(`${BASE_URL}/vendors/bookings/${bookingId}/complete`, {
-      method: 'PUT',
-      headers: authHeader(),
+      method: 'PUT', headers: authHeader(),
     }).then(handleResponse),
 }
 
 // ══════════════════════════════════════════════════════════
 // BOOKING
 // ══════════════════════════════════════════════════════════
-
 export const bookingAPI = {
-  // Buat booking baru — butuh login
   create: (data) =>
     fetch(`${BASE_URL}/bookings`, {
       method: 'POST',
-      headers: authHeader(), // kirim token JWT di header
+      headers: authHeader(),
       body: JSON.stringify(data),
     }).then(handleResponse),
 
-  // Ambil semua booking milik user yang sedang login
   getMyBookings: () =>
-    fetch(`${BASE_URL}/bookings/my`, {
+    fetch(`${BASE_URL}/bookings/my`, { headers: authHeader() }).then(handleResponse),
+
+  getByID: (id) =>
+    fetch(`${BASE_URL}/bookings/${id}`, { headers: authHeader() }).then(handleResponse),
+
+  cancel: (id) =>
+    fetch(`${BASE_URL}/bookings/${id}/cancel`, {
+      method: 'DELETE', headers: authHeader(),
+    }).then(handleResponse),
+}
+
+// ══════════════════════════════════════════════════════════
+// REVIEW
+// ══════════════════════════════════════════════════════════
+export const reviewAPI = {
+  submit: (bookingId, rating, comment) =>
+    fetch(`${BASE_URL}/bookings/${bookingId}/review`, {
+      method: 'POST',
       headers: authHeader(),
+      body: JSON.stringify({ rating, comment }),
     }).then(handleResponse),
 
-  // Ambil detail satu booking
-  getByID: (id) =>
-    fetch(`${BASE_URL}/bookings/${id}`, {
+  getByVendor: (vendorId) =>
+    fetch(`${BASE_URL}/vendors/${vendorId}/reviews`, {
       headers: authHeader(),
     }).then(handleResponse),
 }
@@ -156,23 +154,23 @@ export const bookingAPI = {
 // ══════════════════════════════════════════════════════════
 // ADMIN
 // ══════════════════════════════════════════════════════════
-
 export const adminAPI = {
-  // Ambil dashboard stats
   getDashboard: () =>
-    fetch(`${BASE_URL}/admin/dashboard`, {
-      headers: authHeader(),
-    }).then(handleResponse),
+    fetch(`${BASE_URL}/admin/dashboard`, { headers: authHeader() }).then(handleResponse),
 
-  // Ambil semua users
   getAllUsers: () =>
-    fetch(`${BASE_URL}/admin/users`, {
-      headers: authHeader(),
+    fetch(`${BASE_URL}/admin/users`, { headers: authHeader() }).then(handleResponse),
+
+  getAllVendors: () =>
+    fetch(`${BASE_URL}/admin/vendors`, { headers: authHeader() }).then(handleResponse),
+
+  suspendUser: (userId) =>
+    fetch(`${BASE_URL}/admin/users/${userId}/suspend`, {
+      method: 'PUT', headers: authHeader(),
     }).then(handleResponse),
 
-  // Ambil semua vendors
-  getAllVendors: () =>
-    fetch(`${BASE_URL}/admin/vendors`, {
-      headers: authHeader(),
+  activateUser: (userId) =>
+    fetch(`${BASE_URL}/admin/users/${userId}/activate`, {
+      method: 'PUT', headers: authHeader(),
     }).then(handleResponse),
 }

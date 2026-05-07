@@ -14,6 +14,7 @@ export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [togglingUserId, setTogglingUserId] = useState(null)
 
   useEffect(() => {
     if (user?.role !== 'admin') { navigate('/login'); return }
@@ -31,6 +32,19 @@ export default function AdminPanel() {
       if (vendorsRes.success) setVendors(vendorsRes.data || [])
     } catch (err) { setError(err.message) }
     finally { setIsLoading(false) }
+  }
+
+  const handleToggleUser = async (u) => {
+    if (!window.confirm(`${u.is_active ? 'Suspend' : 'Aktifkan'} user ${u.name}?`)) return
+    setTogglingUserId(u.id)
+    try {
+      if (u.is_active) await adminAPI.suspendUser(u.id)
+      else await adminAPI.activateUser(u.id)
+      setUsers(prev => prev.map(user =>
+        user.id === u.id ? { ...user, is_active: !user.is_active } : user
+      ))
+    } catch (err) { setError(err.message) }
+    finally { setTogglingUserId(null) }
   }
 
   if (isLoading) {
@@ -162,7 +176,7 @@ export default function AdminPanel() {
               <div style={{ overflowX: 'auto' }}>
                 <table className="data-table">
                   <thead><tr>
-                    <th>#</th><th>Nama Pengguna</th><th>Role</th><th>Status</th><th>Tanggal Daftar</th>
+                    <th>#</th><th>Nama Pengguna</th><th>Role</th><th>Status</th><th>Tanggal Daftar</th><th>Aksi</th>
                   </tr></thead>
                   <tbody>
                     {users.map((u, idx) => (
@@ -181,6 +195,24 @@ export default function AdminPanel() {
                           }}>{u.is_active ? 'Active' : 'Inactive'}</span>
                         </td>
                         <td className="td-date">{new Date(u.created_at).toLocaleDateString('id-ID')}</td>
+                        <td>
+                          {u.role !== 'admin' && (
+                            <button
+                              onClick={() => handleToggleUser(u)}
+                              disabled={togglingUserId === u.id}
+                              style={{
+                                padding: '5px 10px', borderRadius: '7px', fontSize: '11px',
+                                fontWeight: '700', cursor: 'pointer', border: 'none',
+                                background: u.is_active ? '#fef2f2' : '#f0fdf4',
+                                color: u.is_active ? '#b91c1c' : '#15803d',
+                                opacity: togglingUserId === u.id ? 0.6 : 1,
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              {togglingUserId === u.id ? '...' : u.is_active ? 'Suspend' : 'Aktifkan'}
+                            </button>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
