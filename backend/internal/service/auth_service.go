@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/daniel/jasa-profesional/internal/model"
@@ -220,4 +221,40 @@ func (s *AuthService) ChangePassword(userID string, oldPassword string, newPassw
 // Logout - proses logout (update last_logout_at)
 func (s *AuthService) Logout(userID string) error {
 	return s.userRepo.UpdateLogoutMetadata(userID)
+}
+
+// ForgotPassword - reset password berdasarkan email + verifikasi nama
+// Memerlukan email DAN nama terdaftar agar lebih aman
+func (s *AuthService) ForgotPassword(email string, name string, newPassword string) error {
+	// 1. Cari user berdasarkan email
+	user, err := s.userRepo.FindByEmail(email)
+	if err != nil {
+		return err
+	}
+	// Gunakan pesan generik agar tidak bocorkan info apakah email terdaftar
+	if user == nil {
+		return errors.New("email atau nama tidak sesuai")
+	}
+
+	// 2. Verifikasi nama — harus cocok dengan nama yang terdaftar (case-insensitive)
+	registeredName := strings.ToLower(strings.TrimSpace(user.Name))
+	inputName := strings.ToLower(strings.TrimSpace(name))
+	if registeredName != inputName {
+		// Pesan sengaja dibuat ambigu agar tidak bocorkan apakah email atau nama yang salah
+		return errors.New("email atau nama tidak sesuai")
+	}
+
+	// 3. Validasi password baru
+	if len(newPassword) < 8 {
+		return errors.New("password baru minimal 8 karakter")
+	}
+
+	// 4. Hash password baru
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	// 5. Update password di database
+	return s.userRepo.UpdatePassword(user.ID, string(hashedPassword))
 }

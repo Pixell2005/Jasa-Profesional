@@ -194,3 +194,36 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 		Message: "logout berhasil",
 	})
 }
+
+// ForgotPassword - POST /api/v1/auth/forgot-password
+// Reset password dengan verifikasi email + nama terdaftar
+// User harus tahu email DAN nama yang terdaftar untuk bisa reset
+func (h *AuthHandler) ForgotPassword(c *gin.Context) {
+	var req struct {
+		Email       string `json:"email" binding:"required,email"`
+		Name        string `json:"name" binding:"required"`
+		NewPassword string `json:"new_password" binding:"required,min=8"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{
+			Success: false,
+			Message: "data tidak valid: " + err.Error(),
+		})
+		return
+	}
+
+	err := h.authService.ForgotPassword(req.Email, req.Name, req.NewPassword)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.Response{
+		Success: true,
+		Message: "password berhasil direset",
+	})
+}

@@ -1,19 +1,12 @@
 // src/pages/VendorRegisterPage.jsx
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { vendorAPI } from '../api/client'
 
 const CATEGORIES = [
-  'Cleaning',
-  'Plumbing',
-  'Electrical',
-  'Carpentry',
-  'Painting',
-  'Pest Control',
-  'Landscaping',
-  'HVAC',
-  'Other'
+  'Cleaning', 'Plumbing', 'Electrical', 'Carpentry',
+  'Painting', 'Pest Control', 'Landscaping', 'HVAC', 'Other'
 ]
 
 export default function VendorRegisterPage() {
@@ -34,9 +27,20 @@ export default function VendorRegisterPage() {
 
   if (!user) {
     return (
-      <div style={styles.page}>
-        <div style={styles.card}>
-          <p style={styles.errorBox}>Silakan login terlebih dahulu untuk mendaftar sebagai vendor</p>
+      <div className="auth-center-page">
+        <div className="auth-center-card" style={{textAlign: 'center'}}>
+          <div className="icon-wrap" style={{margin: '0 auto 1.5rem', background: '#fef2f2'}}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--red)" strokeWidth="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <h2 className="auth-card-title" style={{fontSize: '22px'}}>Akses Ditolak</h2>
+          <p className="auth-card-subtitle" style={{marginBottom: '2rem'}}>
+            Silakan masuk terlebih dahulu untuk mendaftar sebagai vendor profesional.
+          </p>
+          <button className="btn-primary" onClick={() => navigate('/login')}>
+            Menuju Halaman Login
+          </button>
         </div>
       </div>
     )
@@ -93,186 +97,135 @@ export default function VendorRegisterPage() {
   }
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>💼 Daftar Sebagai Vendor</h1>
-        <p style={styles.subtitle}>Mulai menerima pesanan layanan</p>
+    <div className="auth-page">
+      {/* Left panel - Hero Section */}
+      <div className="auth-panel">
+        <div className="auth-brand" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
+          <div className="auth-brand-mark">JP</div>
+          <span className="auth-brand-name">Jasa Profesional</span>
+        </div>
+        <h1 className="auth-hero-title">
+          Kembangkan Bisnis<br />
+          <span>Jasa Anda</span>
+        </h1>
+        <p className="auth-hero-desc">
+          Bergabunglah dengan ribuan vendor profesional lainnya. Jangkau lebih banyak pelanggan dan kelola pesanan Anda dengan mudah.
+        </p>
 
-        {error && <div style={styles.errorBox}>{error}</div>}
-
-        <form onSubmit={handleSubmit}>
-          <div style={styles.field}>
-            <label style={styles.label}>Nama Bisnis</label>
-            <input 
-              style={styles.input} 
-              type="text" 
-              name="name"
-              value={form.name} 
-              onChange={handleChange}
-              placeholder="Nama layanan Anda" 
-              required 
-            />
-          </div>
-
-          <div style={styles.field}>
-            <label style={styles.label}>Kategori Layanan</label>
-            <select 
-              style={styles.input} 
-              name="category"
-              value={form.category} 
-              onChange={handleChange}
-              required
-            >
-              <option value="">Pilih kategori</option>
-              {CATEGORIES.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-          </div>
-
-          <div style={styles.field}>
-            <label style={styles.label}>Deskripsi / Bio</label>
-            <textarea 
-              style={{...styles.input, minHeight: '80px', resize: 'vertical'}}
-              name="bio"
-              value={form.bio} 
-              onChange={handleChange}
-              placeholder="Deskripsikan layanan Anda..." 
-            />
-          </div>
-
-          <div style={styles.field}>
-            <label style={styles.label}>No. Telepon</label>
-            <input 
-              style={styles.input} 
-              type="tel" 
-              name="phone"
-              value={form.phone} 
-              onChange={handleChange}
-              placeholder="08xxxxxxxxx" 
-              required 
-            />
-          </div>
-
-          <div style={styles.row}>
-            <div style={{...styles.field, flex: 1, marginRight: '0.5rem'}}>
-              <label style={styles.label}>Harga (Rp)</label>
-              <input 
-                style={styles.input} 
-                type="number" 
-                name="price"
-                value={form.price} 
-                onChange={handleChange}
-                placeholder="100000" 
-                min="10000"
-                required 
-              />
+        <div style={{marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem'}}>
+          {[
+            { title: 'Jangkauan Luas', desc: 'Dapatkan pelanggan baru setiap harinya dari platform kami.' },
+            { title: 'Sistem Terintegrasi', desc: 'Kelola jadwal, pesanan, dan pendapatan dalam satu dashboard praktis.' },
+            { title: 'Pembayaran Aman', desc: 'Sistem pembayaran terjamin dan transparan untuk setiap pesanan selesai.' },
+          ].map(item => (
+            <div key={item.title} style={{display:'flex', gap:'12px', alignItems:'flex-start'}}>
+              <div style={{
+                width: '20px', height: '20px', borderRadius: '50%',
+                background: 'rgba(59,130,246,0.2)', border: '1.5px solid #3b82f6',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0, marginTop: '1px',
+              }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div>
+                <div style={{color:'#e2e8f0', fontSize:'14px', fontWeight:'600'}}>{item.title}</div>
+                <div style={{color:'#64748b', fontSize:'13px', marginTop:'2px'}}>{item.desc}</div>
+              </div>
             </div>
-            <div style={{...styles.field, flex: 1}}>
-              <label style={styles.label}>Waktu (Jam)</label>
-              <input 
-                style={styles.input} 
-                type="number" 
-                name="etaHours"
-                value={form.etaHours} 
-                onChange={handleChange}
-                placeholder="2" 
-                min="1"
-                required 
-              />
+          ))}
+        </div>
+      </div>
+
+      {/* Right form panel */}
+      <div className="auth-form-side">
+        <div className="auth-card" style={{ maxWidth: '520px', padding: '2.5rem' }}>
+          <h2 className="auth-card-title" style={{fontSize: '24px'}}>Daftar Vendor</h2>
+          <p className="auth-card-subtitle">
+            Lengkapi profil layanan untuk mulai menerima pesanan.
+          </p>
+
+          {error && (
+            <div className="alert alert-error">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{flexShrink:0}}>
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              {error}
             </div>
-          </div>
+          )}
 
-          <div style={styles.field}>
-            <label style={styles.label}>Tags (dipisah koma)</label>
-            <input 
-              style={styles.input} 
-              type="text" 
-              name="tags"
-              value={form.tags} 
-              onChange={handleChange}
-              placeholder="profesional, berpengalaman, cepat" 
-            />
-          </div>
+          <form onSubmit={handleSubmit}>
+            <div className="form-field">
+              <label className="form-label">Nama Bisnis / Layanan</label>
+              <input className="form-input" type="text" name="name"
+                value={form.name} onChange={handleChange}
+                placeholder="Contoh: Jasa Bersih Maksimal" required />
+            </div>
 
-          <button style={styles.button} type="submit" disabled={isLoading}>
-            {isLoading ? 'Memproses...' : 'Daftar Vendor'}
-          </button>
-        </form>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="form-field">
+                <label className="form-label">Kategori</label>
+                <div className="input-wrap">
+                  <select className="form-input" name="category"
+                    value={form.category} onChange={handleChange} required
+                    style={{ appearance: 'none', paddingRight: '36px', cursor: 'pointer' }}>
+                    <option value="" disabled>Pilih Kategori</option>
+                    {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                  </select>
+                  <svg style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--gray-400)' }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+              </div>
+              <div className="form-field">
+                <label className="form-label">No. Telepon (WhatsApp)</label>
+                <input className="form-input" type="tel" name="phone"
+                  value={form.phone} onChange={handleChange}
+                  placeholder="08xxxxxxxxxx" required />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="form-field">
+                <label className="form-label">Harga Mulai Dari (Rp)</label>
+                <div className="input-wrap">
+                  <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--gray-500)', fontSize: '14px', fontWeight: '500' }}>Rp</span>
+                  <input className="form-input" type="number" name="price"
+                    value={form.price} onChange={handleChange}
+                    placeholder="100000" min="10000" style={{ paddingLeft: '38px' }} required />
+                </div>
+              </div>
+              <div className="form-field">
+                <label className="form-label">Waktu Pengerjaan (Jam)</label>
+                <div className="input-wrap">
+                  <input className="form-input" type="number" name="etaHours"
+                    value={form.etaHours} onChange={handleChange}
+                    placeholder="2" min="1" required />
+                  <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--gray-500)', fontSize: '13px' }}>Jam</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="form-field">
+              <label className="form-label">Tags (Keunggulan / Kata Kunci)</label>
+              <input className="form-input" type="text" name="tags"
+                value={form.tags} onChange={handleChange}
+                placeholder="Pisahkan dengan koma (contoh: profesional, cepat, murah)" />
+            </div>
+
+            <div className="form-field">
+              <label className="form-label">Deskripsi Layanan (Opsional)</label>
+              <textarea className="form-input" name="bio"
+                value={form.bio} onChange={handleChange}
+                placeholder="Deskripsikan kelebihan layanan Anda..." 
+                style={{ minHeight: '80px', resize: 'vertical' }} />
+            </div>
+
+            <button className="btn-primary" type="submit" disabled={isLoading} style={{ marginTop: '1rem' }}>
+              {isLoading ? 'Memproses Pendaftaran...' : 'Daftar Sebagai Vendor'}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )
-}
-
-const styles = {
-  page: {
-    minHeight: '100vh', 
-    display: 'flex',
-    alignItems: 'center', 
-    justifyContent: 'center',
-    backgroundColor: '#f5f5f0', 
-    padding: '1rem',
-  },
-  card: {
-    background: '#fff', 
-    borderRadius: '12px',
-    padding: '2.5rem', 
-    width: '100%', 
-    maxWidth: '500px',
-    border: '0.5px solid #e0e0e0',
-  },
-  title: { 
-    fontSize: '22px', 
-    fontWeight: '500', 
-    margin: '0 0 4px' 
-  },
-  subtitle: { 
-    color: '#888', 
-    fontSize: '14px', 
-    margin: '0 0 1.5rem' 
-  },
-  errorBox: {
-    background: '#fff0f0', 
-    color: '#c0392b',
-    border: '0.5px solid #f5c6cb', 
-    borderRadius: '8px',
-    padding: '10px 14px', 
-    fontSize: '13px', 
-    marginBottom: '1rem',
-  },
-  field: { 
-    marginBottom: '1rem' 
-  },
-  row: {
-    display: 'flex',
-    gap: '0.5rem'
-  },
-  label: { 
-    display: 'block', 
-    fontSize: '13px', 
-    color: '#555', 
-    marginBottom: '4px' 
-  },
-  input: {
-    width: '100%', 
-    padding: '10px 12px', 
-    fontSize: '14px',
-    border: '0.5px solid #ccc', 
-    borderRadius: '8px',
-    boxSizing: 'border-box', 
-    outline: 'none',
-    fontFamily: 'inherit',
-  },
-  button: {
-    width: '100%', 
-    padding: '12px', 
-    fontSize: '14px',
-    fontWeight: '500', 
-    background: '#111', 
-    color: '#fff',
-    border: 'none', 
-    borderRadius: '8px', 
-    cursor: 'pointer',
-    marginTop: '0.5rem',
-  },
 }
