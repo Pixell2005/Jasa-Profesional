@@ -1,133 +1,102 @@
 // src/components/Navbar.jsx
-// Komponen navbar yang dipakai di HomePage
-// Dipisah supaya tidak perlu tulis ulang di setiap halaman
-
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 export default function Navbar() {
   const navigate = useNavigate()
   const { isLoggedIn, user, logout } = useAuth()
+  const [open, setOpen] = useState(false)
 
   const handleLogout = () => {
     logout()
     navigate('/')
+    setOpen(false)
   }
 
   return (
-    <nav style={styles.nav}>
-      <span style={styles.brand} onClick={() => navigate('/')}>
-        🛠️ Jasa Profesional
-      </span>
+    <nav className="navbar">
+      <div className="navbar-inner">
+        {/* Brand */}
+        <Link to="/" className="navbar-brand">
+          <div className="navbar-brand-mark">JP</div>
+          <span className="navbar-brand-text">Jasa Profesional</span>
+        </Link>
 
-      <div style={styles.right}>
-        {isLoggedIn ? (
-          <>
-            <span style={styles.greeting}>Halo, {user?.name}</span>
-            
-            {user?.role === 'customer' && (
-              <button style={styles.btn} onClick={() => navigate('/bookings')}>
-                Booking Saya
-              </button>
-            )}
-            
-            {user?.role === 'vendor' && (
-              <>
-                <button style={styles.btn} onClick={() => navigate('/vendor/dashboard')}>
-                  Dashboard Vendor
-                </button>
-                <button style={styles.btn} onClick={() => navigate('/bookings')}>
-                  Booking Sebagai Customer
-                </button>
-              </>
-            )}
-            
-            {user?.role === 'admin' && (
-              <>
-                <button style={styles.btn} onClick={() => navigate('/admin')}>
-                  Admin Panel
-                </button>
-                <button style={styles.btn} onClick={() => navigate('/bookings')}>
-                  Dashboard
-                </button>
-              </>
-            )}
+        {/* Actions */}
+        <div className="navbar-actions">
+          {isLoggedIn ? (
+            <>
+              {user?.role === 'customer' && (
+                <Link to="/bookings" className="nav-link">Booking Saya</Link>
+              )}
+              {user?.role === 'vendor' && (
+                <Link to="/vendor/dashboard" className="nav-link">Dashboard</Link>
+              )}
+              {user?.role === 'admin' && (
+                <Link to="/admin" className="nav-link">Admin Panel</Link>
+              )}
+              {user?.role === 'customer' && (
+                <Link to="/vendor/register" className="nav-link">Daftar Vendor</Link>
+              )}
 
-            {/* Option to register as vendor for customers */}
-            {user?.role === 'customer' && (
-              <button style={{...styles.btn, ...styles.btnVendor}} onClick={() => navigate('/vendor/register')}>
-                Daftar Vendor
-              </button>
-            )}
+              {/* User dropdown */}
+              <div className="user-menu">
+                <button className="user-btn" onClick={() => setOpen(!open)}>
+                  <div className="user-avatar">
+                    {user?.name?.slice(0, 1).toUpperCase()}
+                  </div>
+                  <span className="user-name">{user?.name}</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2"
+                    style={{transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s'}}>
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </button>
 
-            <button style={{ ...styles.btn, ...styles.btnDanger }} onClick={handleLogout}>
-              Keluar
-            </button>
-          </>
-        ) : (
-          <>
-            <button style={styles.btn} onClick={() => navigate('/login')}>
-              Masuk
-            </button>
-            <button style={{ ...styles.btn, ...styles.btnDark }} onClick={() => navigate('/register')}>
-              Daftar
-            </button>
-          </>
-        )}
+                {open && (
+                  <div className="dropdown">
+                    <div className="dropdown-header">
+                      <div className="dropdown-name">{user?.name}</div>
+                      <div className="dropdown-email">{user?.email}</div>
+                      <div className="dropdown-role">{user?.role}</div>
+                    </div>
+
+                    <div className="dropdown-divider"/>
+
+                    <button className="dropdown-item" onClick={() => { navigate('/change-password'); setOpen(false) }}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                      </svg>
+                      Ganti Password
+                    </button>
+
+                    <div className="dropdown-divider"/>
+
+                    <button className="dropdown-item danger" onClick={handleLogout}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                      </svg>
+                      Keluar
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="nav-link">Masuk</Link>
+              <Link to="/register" className="nav-btn-primary">Daftar Gratis</Link>
+            </>
+          )}
+        </div>
       </div>
+
+      {/* Overlay to close dropdown */}
+      {open && (
+        <div style={{position:'fixed', inset:0, zIndex:199}} onClick={() => setOpen(false)} />
+      )}
     </nav>
   )
-}
-
-const styles = {
-  nav: {
-    background: '#fff',
-    padding: '1rem 2rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottom: '0.5px solid #e0e0e0',
-    position: 'sticky',
-    top: 0,
-    zIndex: 100,
-  },
-  brand: {
-    fontWeight: '500',
-    fontSize: '16px',
-    cursor: 'pointer',
-  },
-  right: {
-    display: 'flex',
-    gap: '8px',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  },
-  greeting: {
-    fontSize: '13px',
-    color: '#888',
-    marginRight: '4px',
-  },
-  btn: {
-    padding: '7px 14px',
-    fontSize: '13px',
-    borderRadius: '8px',
-    border: '0.5px solid #ccc',
-    background: '#fff',
-    cursor: 'pointer',
-    fontFamily: 'sans-serif',
-  },
-  btnDark: {
-    background: '#111',
-    color: '#fff',
-    border: '0.5px solid #111',
-  },
-  btnDanger: {
-    color: '#e74c3c',
-    borderColor: '#e74c3c',
-  },
-  btnVendor: {
-    background: '#ff9800',
-    color: '#fff',
-    border: '0.5px solid #ff9800',
-  },
 }

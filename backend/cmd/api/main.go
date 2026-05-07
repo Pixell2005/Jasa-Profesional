@@ -72,6 +72,7 @@ func main() {
 		// Auth
 		public.POST("/auth/register", authHandler.Register)
 		public.POST("/auth/login", authHandler.Login)
+		public.POST("/auth/forgot-password", authHandler.ForgotPassword)
 
 		// Vendor — siapa pun bisa lihat daftar vendor
 		public.GET("/vendors", vendorHandler.GetAll)

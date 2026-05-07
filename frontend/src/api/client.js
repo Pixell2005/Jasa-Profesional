@@ -50,6 +50,22 @@ export const authAPI = {
     fetch(`${BASE_URL}/auth/me`, {
       headers: authHeader(),
     }).then(handleResponse),
+
+  // Reset password — perlu email + nama terdaftar + password baru
+  forgotPassword: (email, name, newPassword) =>
+    fetch(`${BASE_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, name, new_password: newPassword }),
+    }).then(handleResponse),
+
+  // Ganti password — user harus login, perlu password lama
+  changePassword: (oldPassword, newPassword) =>
+    fetch(`${BASE_URL}/auth/change-password`, {
+      method: 'PUT',
+      headers: authHeader(),
+      body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
+    }).then(handleResponse),
 }
 
 // ══════════════════════════════════════════════════════════
