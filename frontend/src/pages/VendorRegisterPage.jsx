@@ -101,7 +101,34 @@ export default function VendorRegisterPage() {
 
       {/* Right Form Panel */}
       <div className="auth-form-side">
-        <div className="auth-card" style={{ maxWidth: '520px', padding: '2.5rem' }}>
+        <div className="auth-card" style={{ maxWidth: '520px', padding: '2.5rem', position: 'relative' }}>
+          <button 
+            type="button" 
+            onClick={() => navigate(-1)} 
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '6px', 
+              background: 'none', 
+              border: 'none', 
+              color: 'var(--gray-500)', 
+              cursor: 'pointer', 
+              marginBottom: '1.5rem', 
+              padding: 0, 
+              fontSize: '14px', 
+              fontWeight: '500',
+              transition: 'color 0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.color = 'var(--gray-900)'}
+            onMouseOut={(e) => e.currentTarget.style.color = 'var(--gray-500)'}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Kembali
+          </button>
+          
           <h2 className="auth-card-title" style={{ fontSize: '24px' }}>Daftar Vendor</h2>
           <p className="auth-card-subtitle">Lengkapi profil layanan untuk mulai menerima pesanan.</p>
 
